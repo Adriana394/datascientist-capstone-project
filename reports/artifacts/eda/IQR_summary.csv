@@ -1,0 +1,13 @@
+Feature,Outliers,Percent
+months_as_customer,0,0.0
+policy_deductable,0,0.0
+policy_annual_premium,9,0.9
+umbrella_limit,0,0.0
+total_claim_amount,1,0.1
+fraud_reported,0,0.0
+injury_share,0,0.0
+vehicle_share,4,0.4
+property_share,1,0.1
+claim_to_premium,15,1.5
+claim_to_deductible,14,1.4
+has_umbrella_policy,0,0.0

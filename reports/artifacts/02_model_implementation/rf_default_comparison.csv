@@ -1,0 +1,4 @@
+Model,PR-AUC,Precision (Fraud),Recall (Fraud),F1 (Fraud),Precision (Non-Fraud),Recall (Non-Fraud),F1 (Non-Fraud),Accuracy
+RF Base (tuned),0.543,0.465,0.8,0.588,0.912,0.693,0.788,0.72
+RF + SMOTE (tuned),0.619,0.525,0.84,0.646,0.933,0.747,0.83,0.77
+RF + FS (tuned),0.649,0.455,0.8,0.58,0.911,0.68,0.779,0.71

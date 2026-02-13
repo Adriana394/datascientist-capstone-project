@@ -1,0 +1,22 @@
+# Analysis & Data Preprocessing
+pandas
+numpy
+
+# Visualization
+matplotlib
+seaborn
+scipy
+shap
+
+# Machine Learning
+scikit-learn
+imbalanced-learn
+
+# XGBoost
+xgboost
+
+#CatBoost
+catboost
+
+# Streamlit
+streamlit

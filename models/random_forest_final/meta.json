@@ -1,0 +1,9 @@
+{
+  "sklearn_version": "1.8.0",
+  "python": "3.12.12",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "model_type": "RandomForest + SMOTE + Pipeline",
+  "threshold": 0.3091198149458227,
+  "threshold_selection": "Validation tuning (max recall with precision >= 0.35)",
+  "selected_variant": "rf_smote_tuned"
+}

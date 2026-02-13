@@ -1,0 +1,13 @@
+feature,p_value,cramers_v
+incident_severity,5.45e-57,0.514
+collision_type,7.12e-07,0.177
+incident_type,2.1e-06,0.171
+authorities_contacted,0.000316,0.137
+incident_state,0.0131,0.127
+auto_make,0.39,0.117
+property_damage,0.018,0.09
+incident_city,0.856,0.051
+insured_education_level,0.946,0.041
+policy_state,0.6,0.032
+police_report_available,0.657,0.029
+insured_sex,0.367,0.029

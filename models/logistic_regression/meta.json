@@ -1,0 +1,8 @@
+{
+  "sklearn_version": "1.8.0",
+  "python": "3.12.12",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "model_type": "LogisticRegression + Pipeline",
+  "threshold": 0.5,
+  "notes": "Baseline linear model (no threshold tuning)"
+}
