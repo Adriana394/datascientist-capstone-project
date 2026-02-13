@@ -1,307 +1,195 @@
-# Insurance Claim Fraud Prediction - Capstone Project
----
-*End-to-End Machine Learning Workflow  · Streamlit Dashboard*
+# Insurance Fraud Detection – Capstone Project (DataScientest)
 
-This repository contains the code and artifacts for my **Capstone Project** in the **DataScientest Data Scientist Program**. 
-The goal is to build an end-to-end fraud detection pipeline for insurance claims, including:
+This repository contains an **end-to-end machine learning project** for predicting fraudulent insurance claims (`fraud_reported`).  
+The focus is on **tabular data**, **class imbalance**, **threshold optimization**, and **interpretability** (including SHAP).
 
-- **EDA & Statistical Testing**
-- **Feature Engineering**
-- multiple **ML Models**
-- **Threshold Optimization**
-- **SHAP & Permutation Importance**
-- a **Streamlit App** for interactive exploration of results
+## Objective & Metrics
+
+- **Objective**: Binary classification of "fraud" vs. "no fraud" for individual claims.
+- **Challenges**: Rare target class, costly false negatives, leakage risk, many categorical features.
+- **Evaluation**: Primarily **PR-AUC** and **Precision/Recall/F1** for the fraud class; additionally **threshold tuning** (operating point).
 
 ## Project Structure
----
 
-├── data/<br>                             
-├── notebooks/<br>
-│   ├── 01_data_exploration.ipynb          
-│   ├── 02_model_implementation.ipynb     
-│   ├── 03_model_implementation_xgb.ipynb  
-│   └── 04_model_implementation_catboost.ipynb<br>    
-│
-├── models/<br>                          
-│
-├── fraud_app/                     
-│    ├── home.py                    
-│    ├── pages/                      
-│    └── artifacts/<br>                   
-│
-|── reports/                     
-│   ├── figures                    
-│   ├── report.md<br>                       
-│   
-|
-├── requirements.txt<br>  
+```text
+datascientist_project_remake/
+├── data/                         # Raw/cleaned/preprocessed data (CSV)
+├── notebooks/                    # EDA + modeling (01–04)
+├── models/                       # Saved models per approach
+├── reports/
+│   ├── artifacts/                # Notebook artifacts (e.g., tuning, metrics)
+│   └── figures/                  # Exported plots
+├── src/                          # (Template) Python package structure
+│   └── streamlit/app.py          # Currently empty (no dashboard yet)
+├── requirements.txt
 └── README.md
+```
 
+## Notebooks (Workflow)
 
-## 🧠 Problem Description
+### 1. Data Exploration (`01_data_exploration.ipynb`)
 
-Insurance fraud is relatively rare but financially damaging.  
-The task is to classify each claim as **fraudulent** or **non-fraudulent** using structured customer, incident, and claim information.
+Comprehensive exploratory data analysis including:
 
-### Key Challenges
+- **Data Quality**: Missing values inspection, data type analysis, basic cleaning
+- **Outlier Detection**: IQR-based outlier analysis (notably in `umbrella_limit`)
+- **Distribution Analysis**: 
+  - Numerical feature distributions and skewness
+  - Categorical feature distributions
+  - Class imbalance assessment (~24.7% fraud)
+- **Correlation Analysis**: Pearson correlation heatmap revealing multicollinearity among claim amount variables (`total_claim_amount`, `vehicle_claim`, `property_claim`, `injury_claim`)
+- **Statistical Testing**:
+  - **Mann-Whitney U test** for numerical features (with Cliff's Delta effect size)
+  - **Chi-Square test** for categorical features (with Cramér's V)
+  - Results show `incident_severity` as the strongest categorical predictor (V = 0.514)
+  - Claim amount variables show moderate effect sizes for fraud discrimination
 
-- **Strong class imbalance** (fraud ≈ 24,7%)  
-- **High cost of false negatives**  
-- **Need for interpretability** for business adoption  
-- Avoiding **data leakage**  
-- Handling **mixed data types**, **missing values** & **inconsistent labels**  
-
----
-
-## 🔍 Exploratory Data Analysis (EDA)  
-Notebook: **`01_data_exploration.ipynb`**
-
-The EDA examined:
-
-- Dataset overview & data types  
-- Missing values inspection  
-- Outlier analysis using IQR  
-- Numerical distributions & skewness  
-- Categorical feature distributions  
-- Correlation heatmaps  
-- Statistical tests:  
-  - **Mann–Whitney U** for numerical features  
-  - **Chi-Square** for categorical features  
-
-### Key Insights
-
-- Fraud is correlated with **high incident severity** and **higher claim amounts**  
-- Claim subcomponents (`injury_claim`, `property_claim`, `vehicle_claim`) show **strong multicollinearity** with `total_claim_amount`  
-- Outliers occur mainly in `umbrella_limit` — left untouched because tree-based models handle them well  
-- Missing categorical data was encoded as **"Unknown"** to preserve uncertainty  
-- A new feature **`has_umbrella_policy`** was engineered to capture policy coverage in a clean binary form  
+**Key Insights**: High incident severity and larger claim amounts correlate with fraud. Missing categorical data encoded as "Unknown" to preserve uncertainty. Feature engineering: `has_umbrella_policy` created as binary indicator.
 
 ---
 
-## 🤖 Machine Learning Models
+### 2. Baseline & Random Forest Models (`02_model_implementation.ipynb`)
 
-All model development is documented in:
+Implements baseline and Random Forest models with multiple variants:
 
-- `02_model_implementation.ipynb` — Logistic Regression & Random Forest  
-- `03_model_implementation_xgb.ipynb` — XGBoost  
-- `04_model_implementation_catboost.ipynb` — CatBoost  
+**Baseline Model:**
+- **Logistic Regression** with `class_weight='balanced'` and standardized features
+- Serves as interpretable linear baseline
+- Uses One-Hot Encoding for categorical features
 
-Shared preprocessing pipeline:
+**Random Forest Models:**
+1. **Base RF**: `RandomForestClassifier` with `class_weight='balanced_subsample'` (300 trees)
+2. **RF + BorderlineSMOTE**: Adds oversampling via BorderlineSMOTE to handle class imbalance
+3. **RF + BorderlineSMOTE + Feature Selection**: Adds `SelectFromModel` feature selection based on RF importance
 
-- Train/validation/test split  
-- **Encoding**
-  - **LogReg / Random Forest:** One-Hot Encoding  
-  - **CatBoost:** native categorical handling (no OHE)  
-  - **XGBoost:** consistent handling as implemented in the notebook (OHE or native categorical)  
-- Standardization for LR  
-- Stratified K-Fold cross-validation  
-- Threshold optimization based on **F1** and optional recall constraint  
+**Preprocessing:**
+- One-Hot Encoding for categorical features
+- StandardScaler for Logistic Regression
+- Train/validation/test split (stratified)
+- Stratified K-Fold cross-validation
 
----
+**Evaluation & Interpretability:**
+- PR-AUC and fraud-class Precision/Recall/F1 metrics
+- Threshold optimization (F1-maximizing threshold)
+- **SHAP Summary plots** for global feature importance
+- **Permutation Importance** as secondary validation
+- t-SNE visualization for class separation intuition
 
-## 1️⃣ Logistic Regression (Baseline)
-
-Logistic Regression was used as a **transparent linear baseline**.
-
-### Interpretability
-
-- Good interpretability  
-- Underfits complex non-linear patterns  
-- Relatively low recall, which misses too many fraud cases  
-- Useful as a baseline, not suitable for production  
+**Results**: RF + SMOTE + Feature Selection achieves best performance (PR-AUC ≈ 0.65, F1 ≈ 0.69 after threshold tuning).
 
 ---
 
-## 2️⃣ Random Forest (Base, SMOTE, Feature Selection)  
-Notebook: **`02_model_implementation.ipynb`**
+### 3. XGBoost Model (`03_model_implementation_xgb.ipynb`)
 
-### Models Trained
+Gradient boosting model with native categorical feature handling:
 
-1. **Base Random Forest**  
-2. **RF + BorderlineSMOTE**  
-3. **RF + BorderlineSMOTE + Feature Selection**
+**Model Configuration:**
+- `XGBClassifier` with `enable_categorical=True` (native categorical support, no OHE needed)
+- `scale_pos_weight` for class imbalance handling
+- `eval_metric='aucpr'` (PR-AUC)
+- `tree_method='hist'` for efficiency
 
-### Results — default Threshold (0.50)
+**Hyperparameter Tuning:**
+- **GridSearchCV** with 5-fold StratifiedKFold
+- Parameter grid: `n_estimators` [300, 600, 1000], `learning_rate` [0.03, 0.05, 0.1], `max_depth` [2, 3, 5], `min_child_weight` [5, 10], `subsample` [0.7, 0.9, 1.0], `colsample_bytree` [0.7, 0.9, 1.0]
+- Scoring: `average_precision` (PR-AUC)
 
-| Model | Precision | Recall | F1 | Accuracy |
-|------|----------:|-------:|---:|---------:|
-| Base RF | 0.529 | 0.720 | 0.610 | 0.770 |
-| RF + SMOTE | 0.600 | 0.360 | 0.450 | 0.780 |
-| RF + SMOTE + FS | 0.606 | 0.800 | 0.690 | 0.820 |
+**Evaluation:**
+- Threshold optimization on validation set
+- SHAP analysis (summary plots, dependence plots)
+- Permutation importance
+- Test set evaluation with optimized threshold
 
-### Results after Threshold Optimization
-
-| Model | τ* | Precision | Recall | F1 | Accuracy |
-|------|---:|----------:|-------:|---:| ----------:|
-| Base RF | 0.480 | 0.528 | 0.760 | 0.623 | 0.77
-| RF + SMOTE | 0.380 | 0.571 | 0.8 | 0.667 | 0.80
-| RF + SMOTE + FS | 0.578 | 0.593 | 0.640 | 0.615 | 0.80
-
-### Interpretability
-
-- **Permutation Importance** → `incident_severity` dominates  
-- **SHAP Summary** → High severity, missing damage info and larger claim amounts ↑ fraud likelihood  
-
-Random Forest delivers strong performance but is surpassed by boosting models.
+**Results**: Strong balance between recall and precision (Recall ≈ 0.84, Precision ≈ 0.55-0.64 depending on threshold, F1 ≈ 0.67-0.72).
 
 ---
 
-## 3️⃣ XGBoost  
-Notebook: **`03_model_implementation_xgb.ipynb`**
+### 4. CatBoost Model (`04_model_implementation_catboost.ipynb`)
 
-XGBoost uses gradient boosting with strong regularization and learns complex non-linear boundaries.
+CatBoost implementation leveraging native categorical feature handling:
 
-### Results — default Threshold (0.50)
+**Model Configuration:**
+- `CatBoostClassifier` with explicit categorical feature specification via `Pool` objects
+- `loss_function='Logloss'`, `eval_metric='PRAUC'`
+- `scale_pos_weight` for class imbalance
+- `bootstrap_type='Bernoulli'`
+- **Early stopping** with validation set (50 rounds patience)
 
-| Precision | Recall | F1 | Accuracy |
-|----------:|-------:|---:|---------:|
-| 0.636 | 0.840 | 0.724 | 0.84 |
+**Hyperparameter Tuning:**
+- **RandomizedSearchCV** with 5-fold StratifiedKFold
+- Parameter distributions: `iterations`, `learning_rate`, `depth`, `l2_leaf_reg`, `border_count`, `bagging_temperature`
+- Scoring: `average_precision` (PR-AUC)
 
-### Results after Threshold Optimization
+**Categorical Feature Handling:**
+- Categorical columns identified and converted to pandas `category` dtype
+- Explicitly passed to CatBoost via `Pool` objects (avoids one-hot encoding overhead)
+- Reduces overfitting risk on small datasets
 
-| τ* | Precision | Recall | F1 | Accuracy |
-|--:|----------:|-------:|---:|---------:|
-| 0.496 | 0.553 | 0.84 | 0.667 | 0.79 |
+**Evaluation:**
+- Threshold optimization
+- SHAP analysis (summary plots, dependence plots)
+- Permutation importance
+- Test set evaluation
 
-### Interpretability
-
-- Excellent balance between recall and precision  
-- Outperforms both LR and RF  
-- SHAP shows incident severity and claim amounts as dominant drivers  
-- A reduced **Top 3- model** retains most performance (F1 ≈ 0.69)  
-
-XGBoost is a high-performing and interpretable model.
-
----
-
-## 4️⃣ CatBoost
-Notebook: **`04_model_implementation_catboost.ipynb`**
-
-CatBoost is designed for **categorical handling**, **ordered boosting**, and **strong generalization** on tabular data.
-
-### Model Setup
-
-- Categorical features passed directly (no OHE)  
-- Loss function: `Logloss`  
-- Eval metric: `PRAUC`  
-- Class imbalance handled via `scale_pos_weight`  
-- Randomized Search for hyperparameter tuning  
-- Early stopping  
-
-### Results — default Threshold (0.50)
-
-| Precision | Recall | F1 | Accuracy |
-|----------:|-------:|---:|---------:|
-| **0.625** | **0.80** | **0.702** | **0.83** |
-
-### Results after Threshold Optimization
-
-| τ* | Precision | Recall | F1 | Accuracy |
-|---:|----------:|-------:|---:|---------:|
-| 0.464 | 0.606 | 0.80 | 0.690 | 0.82 |
-
-### Interpretability
-
-- **SHAP Summary & Dependence Plots**  
-- **Permutation Importance**  
-- `incident_severity` remains the strongest predictor  
-- Policy-related variables and “Unknown” categories influence risk  
-- CatBoost provides **stable** and **interpretable** predictions  
+**Results**: Stable performance with good interpretability (Precision ≈ 0.61, Recall ≈ 0.80, F1 ≈ 0.69 after threshold optimization). `incident_severity` remains the strongest predictor.
 
 ---
 
-## 🎯 Threshold Optimization
+## Common Methodologies Across Notebooks
 
-Because fraud data is imbalanced, default thresholds are suboptimal.  
-For each model:
+### Threshold Optimization
 
-- Precision–Recall analysis  
-- F1-maximizing threshold  
-- Optionally enforce minimum recall  
-- Selected threshold applied to test set  
+All models (except baseline Logistic Regression) undergo threshold optimization:
 
-This ensures realistic, business-driven operating points.
+- **Precision-Recall Curve Analysis**: Evaluates trade-offs across threshold values
+- **F1-Maximizing Threshold**: Finds optimal threshold that maximizes F1 score on validation set
+- **Optional Recall Constraints**: Can enforce minimum recall requirements for business needs
+- **Test Set Application**: Selected threshold applied to final test set evaluation
 
----
+This ensures models operate at business-aligned decision points rather than default 0.5 threshold.
 
-## 🧮 Interpretability
+### Model Interpretability
 
-### SHAP  
-Used for:
+Both tree-based models (RF, XGBoost, CatBoost) include interpretability analysis:
 
-- Global feature importance  
-- Local explanations  
-- Dependence plots  
-- Detecting monotonicity and interactions  
+- **SHAP (SHapley Additive exPlanations)**:
+  - Summary plots for global feature importance
+  - Dependence plots showing feature interactions
+  - Local explanations for individual predictions
+  - Helps identify monotonicity and feature interactions
 
-### Permutation Importance  
-Used as a secondary check to validate SHAP and rule out leakage.
+- **Permutation Importance**:
+  - Used as secondary validation method
+  - Helps rule out data leakage
+  - Validates SHAP findings
 
----
-
-## 🖥 Streamlit Dashboard
-
-Available in `fraud_app/`.
-
-### Pages include:
-
-1. **Home + Introduction**
-2. **EDA & Data Quality**
-3. **Logistic Regression & Random Forest**
-4. **XGBoost**
-5. **CatBoost**
-6. **Feature Reduction**
-7. **Final Project Summary**
-
-Includes:
-
-- KPI cards  
-- Feature distribution plots  
-- Threshold optimization charts  
-- SHAP visualizations  
-- Model comparison  
-- Recommended thresholds  
+**Consistent Finding**: `incident_severity` consistently emerges as the strongest predictor across all models, followed by claim amount variables (`total_claim_amount`, `vehicle_claim`, etc.).
 
 ---
 
-## 🔧 Installation
+## Models
+
+Trained models and related outputs are located in:
+
+- **`models/`**: Saved model states (e.g., `xgboost/`, `catboost/`, `random_forest_final/`, `logistic_regression/`)
+- **`reports/artifacts/`** and **`reports/figures/`**: Artifacts and figures per notebook/experiment
+
+## Installation & Reproducibility
+
+Create a Python environment and install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Run the dashboard:
+Then run the notebooks in order **01 → 04**.  
+Results (models/plots/artifacts) will be saved to `models/` and `reports/` respectively.
 
-```bash
-cd fraud_app
-streamlit run Home.py
-```
----
+## Streamlit (Status)
 
-## Reproducibility
+The repository contains `src/streamlit/app.py`, but this file is currently **empty**.  
+If a dashboard is planned, it can be added there (dependencies: `streamlit` is already in `requirements.txt`).
 
-- All modeling steps are documented in Jupyter Notebooks
-- Models saved to models/
-- Streamlit dynamically loads saved artifacts and plots
+## License & Template
 
----
-
-## Conclusion
-This project delivers a complete real-world fraud detection solution:
-
-- EDA & statistical testing
-
-- Advanced ML modeling
-
-- threshold optimization for business alignment
-
-- model explainability
-
-- a polished, interactive Streamlit app
-
-- clear evaluation & comparison
-
-The final model – XGBoost – achieves the strongest balance between recall, precision, stability, and explainability, making it suitable for deployment in real insurance environments.
-
-
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+See `LICENSE` for license information. Project structure is based on the Cookiecutter Data Science template.

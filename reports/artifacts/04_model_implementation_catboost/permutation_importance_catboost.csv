@@ -1,0 +1,17 @@
+Feature,Importance_mean,Importance_std
+incident_severity,0.27424335749005657,0.02394892763748369
+months_as_customer,0.0,0.0
+policy_annual_premium,0.0,0.0
+policy_deductable,0.0,0.0
+umbrella_limit,0.0,0.0
+incident_type,0.0,0.0
+collision_type,0.0,0.0
+authorities_contacted,0.0,0.0
+property_damage,0.0,0.0
+total_claim_amount,0.0,0.0
+injury_share,0.0,0.0
+vehicle_share,0.0,0.0
+property_share,0.0,0.0
+claim_to_deductible,0.0,0.0
+has_umbrella_policy,0.0,0.0
+claim_to_premium,-0.0018436484966100285,0.02761965101058644

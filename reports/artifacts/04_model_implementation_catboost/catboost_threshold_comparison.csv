@@ -1,0 +1,3 @@
+Model,Threshold,Precision,Recall,F1,Accuracy
+CatBoost - t = 0.50,0.5,0.625,0.8,0.702,0.83
+CatBoost - tuned t = 0.494,0.4938850734644671,0.282,0.96,0.436,0.38

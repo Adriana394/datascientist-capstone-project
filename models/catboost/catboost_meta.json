@@ -1,0 +1,9 @@
+{
+  "sklearn_version": "1.8.0",
+  "python": "3.12.12",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "model_type": "CatBoostClassifier",
+  "threshold_default": 0.5,
+  "threshold_tuned": 0.5116878160739294,
+  "notes": "Model trained with CatBoost randomized_search params + early stopping."
+}
