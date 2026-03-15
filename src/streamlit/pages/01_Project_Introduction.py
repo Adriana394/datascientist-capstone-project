@@ -38,7 +38,7 @@ section_title("🧪 Technical Overview")
 feature_cards([
     {
         "title": "Dataset",
-        "body": "Structured insurance claims data with mixed numerical and categorical features."
+        "body": "Insurance claims data with mixed numerical and categorical features."
     },
     {
         "title": "Target",
@@ -116,6 +116,7 @@ with col1:
         <li>Accuracy alone can therefore be misleading.</li>
         <li>The default threshold of 0.50 is not always the most useful operating point.</li>
         <li>Strong performance is not enough if the model cannot be interpreted convincingly.</li>
+        <li>The dataset combines numerical and categorical features, which requires different preprocessing strategies across models.</li> 
     </ul>
 </div>
         """,
@@ -138,6 +139,7 @@ with col2:
         <li>PR-AUC, fraud precision, recall and F1 are better aligned with the business problem.</li>
         <li>Threshold tuning adds a practical decision layer beyond standard classification output.</li>
         <li>SHAP and permutation importance improve transparency and communication.</li>
+        <li>Earlier identification of suspicious claims can support more forcused manual review.</li>
     </ul>
 </div>
         """,

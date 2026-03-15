@@ -27,7 +27,7 @@ This app demonstrates how a professional end-to-end ML workflow can assist fraud
 - highlighting suspicious claims  
 - comparing multiple model families  
 - adjusting decision thresholds to business needs  
-- offering interpretable insights via SHAP
+- offering interpretable insights via SHAP and permutation importance
 """
 )
 
@@ -35,7 +35,7 @@ section_title("🧩 What this app highlights")
 feature_cards([
     {
         "title": "📊 Exploratory Analysis",
-        "body": "Important fraud patterns, target imbalance, engineered features and data refinement steps are presented visually and clearly."
+        "body": "Important fraud patterns, target imbalance, data cleaning, preparation, and engineered features steps are presented visually and clearly."
     },
     {
         "title": "🤖 Model Comparison",
@@ -53,7 +53,7 @@ timeline_cards([
     {"title": "2️⃣ Preprocessing", "body": "Prepare mixed numerical and categorical features for different model families."},
     {"title": "3️⃣ Class Imbalance", "body": "Use class weights and SMOTE-based strategies to support minority-class learning."},
     {"title": "4️⃣ Modeling", "body": "Train baseline and tree-based models to compare different decision behaviors."},
-    {"title": "5️⃣ Threshold Tuning", "body": "Evaluate alternative thresholds to find more useful fraud-detection operating points."},
+    {"title": "5️⃣ Threshold Tuning", "body": "Evaluate alternative thresholds beyond the default 0.5."},
     {"title": "6️⃣ Interpretation", "body": "Use explainability tools to connect model behavior back to meaningful claim features."},
 ])
 
