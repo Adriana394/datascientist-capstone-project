@@ -111,8 +111,8 @@ The project focuses on fraud‑relevant metrics:
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repo-url>
-cd datascientist_project_remake
+git clone <[your-repo-url](https://github.com/Adriana394/datascientist-capstone-project)>
+cd datascientist_project
 ```
 
 ### 2. Create and activate a virtual environment (recommended)
